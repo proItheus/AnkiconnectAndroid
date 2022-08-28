@@ -8,7 +8,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 public class Parser {
-    public static Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    public static Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
 
     public static JsonObject parse(String raw_data) {
         return JsonParser.parseString(raw_data).getAsJsonObject();
@@ -17,7 +17,7 @@ public class Parser {
     public static String get_action(JsonObject data) {
         return data.get("action").getAsString();
     }
-
+    public static int get_version(JsonObject data) { return data.get("version").getAsInt(); } //get the request's api version
     public static String getDeckName(JsonObject raw_data) {
         return raw_data.get("params").getAsJsonObject().get("note").getAsJsonObject().get("deckName").getAsString();
     }

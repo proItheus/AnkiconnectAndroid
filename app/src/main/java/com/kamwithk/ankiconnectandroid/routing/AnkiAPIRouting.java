@@ -73,18 +73,29 @@ public class AnkiAPIRouting {
 
     public NanoHTTPD.Response findRouteHandleError(JsonObject raw_json) {
         try {
-            return returnResponse(findRoute(raw_json));
+            return returnResponse(findRoute(raw_json),Parser.get_version(raw_json));
         } catch (Exception e) {
             Map<String, String> response = new HashMap<>();
             response.put("result", null);
             response.put("error", e.toString());
-
             return newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "text/json", Parser.gson.toJson(response));
         }
     }
 
-    private NanoHTTPD.Response returnResponse(String response) {
-        return newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "text/json", response);
+    private NanoHTTPD.Response returnResponse(String response,int version) {
+        String newResponse;
+        if (version<=4)
+            newResponse=response;
+        else
+            if (response.charAt(0) == '[' && response.charAt(response.length() - 1) == ']') // prevent json array from being quoted
+                newResponse = "{\n\"result\": " + response + ",\n\"error\": null\n}";
+            else {
+                Map<String, String> temp = new HashMap<>();
+                temp.put("result", response);
+                temp.put("error", null);
+                newResponse = Parser.gson.toJson(temp);
+            }
+        return newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "text/json", newResponse);
     }
 
     private String version() {
